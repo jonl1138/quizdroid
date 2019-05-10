@@ -12,7 +12,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val topics = arrayOf("Football", "Math", "Physics", "Marvel Superheroes")
+        // accesses topic lists from DataManager
+        val quizApp = QuizApp.instance
+        val dataManager = quizApp.dataManager
+        val topics = dataManager.getTopics()!!
 
         for (topic in topics) {
             val currID = resources.getIdentifier(topic.toLowerCase().replace(" ", "_"), "id", "edu.washington.jonl1138.quizdroid")

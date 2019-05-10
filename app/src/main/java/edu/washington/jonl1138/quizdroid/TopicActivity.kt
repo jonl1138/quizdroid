@@ -10,21 +10,34 @@ import kotlinx.android.synthetic.main.activity_topic.*
 import org.w3c.dom.Text
 import java.io.Serializable
 
-class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, QuestionFragment.NextClickListener, AnswerFragment.OnNextAnswerListener {
+class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, QuestionFragment.OnNextClickListener, AnswerFragment.OnNextAnswerListener {
 
     private var questionIndex = 0
     private var currentTopic = ""
-    private val descriptions: Map<String, String> = mapOf("Football" to "All Questions about American Football",
-        "Math" to "All questions about Math",
-        "Physics" to "All questions about Physics",
-        "Marvel Superheroes" to "All questions about Marvel Superheroes"
-    )
-    private val questions: Map<String, Array<String>> = mapOf("Football" to arrayOf<String>("Who is the quarterback for the New England Patriots?",
-        "Who was drafted #1 overall in the 2019 NFL draft?",
-        "What position did Marshawn Lynch play?"),
-        "Math" to arrayOf<String>("What is 4+4?"),
-        "Physics" to arrayOf<String>("What is equal to mass * acceleration?"),
-        "Marvel Superheroes" to arrayOf<String>("What is Captain America's shield made of?"))
+    lateinit private var descriptions: Map<String, String>
+    lateinit private var questions: Map<String, Array<String>>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_topic)
+
+        // grabs inputted topic name
+        val intent: Intent = getIntent()
+        currentTopic = intent.getStringExtra("TOPIC_NAME")
+
+        // accesses DataManager to get stored descriptions/ questions lists
+        val quizApp = QuizApp.instance
+        val dataManager = quizApp.dataManager
+        descriptions = dataManager.getDescriptions()
+        questions = dataManager.getQuestions()
+
+        // By default starts TopicFragment
+        val topicDescFragment = TopicFragment.newInstance(currentTopic, descriptions.get(currentTopic)!!, questions.get(currentTopic)!!.size)
+        supportFragmentManager.beginTransaction().run {
+            add(R.id.fragment_container, topicDescFragment, "TOPIC_FRAGMENT")
+            commit()
+        }
+    }
 
     override fun onClick(input_questions: Array<String>, questionIndex: Int, numCorrect: Int) {
         if (questionIndex == input_questions.size) {
@@ -66,18 +79,6 @@ class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, Que
     }
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_topic)
 
-        val intent: Intent = getIntent()
-        currentTopic = intent.getStringExtra("TOPIC_NAME")
-
-        val topicDescFragment = TopicFragment.newInstance(currentTopic, descriptions.get(currentTopic)!!, questions.get(currentTopic)!!.size)
-        supportFragmentManager.beginTransaction().run {
-            add(R.id.fragment_container, topicDescFragment, "TOPIC_FRAGMENT")
-            commit()
-        }
-    }
 
 }

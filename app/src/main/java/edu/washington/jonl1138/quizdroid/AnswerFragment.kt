@@ -73,7 +73,7 @@ class AnswerFragment : Fragment() {
         if (context is OnNextAnswerListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnNextAnswerListener")
         }
     }
 
