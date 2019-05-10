@@ -26,9 +26,10 @@ private const val ARG_PARAM2 = "param2"
  *
  */
 class AnswerFragment : Fragment() {
+    private var topic: String? = null
     private var numCorrect: Int? = null
     private var questionIndex: Int? = null
-    private var questions: Array<String>? = null
+    private var questions: Array<Question>? = null
     private var correctAnswer: String? = null
     private var userAnswer: String? = null
     private var listener: OnNextAnswerListener? = null
@@ -38,10 +39,13 @@ class AnswerFragment : Fragment() {
         arguments?.let {
             numCorrect = it.getInt("NUM_CORRECT")
             questionIndex = it.getInt("QUESTION_INDEX")
-            questions = it.getStringArray("QUESTIONS")
             correctAnswer = it.getString("CORRECT_ANSWER")
             userAnswer = it.getString("USER_ANSWER")
+            topic = it.getString("TOPIC")
         }
+        val quizApp = QuizApp.instance
+        val dataManager = quizApp.dataManager
+        questions = dataManager.getFullTopics()[topic]!!.questions
     }
 
     override fun onCreateView(
@@ -61,7 +65,7 @@ class AnswerFragment : Fragment() {
             continueButton.text = "Next Question"
         }
         continueButton.setOnClickListener {
-            listener!!.onClick(questions!!, questionIndex!!, numCorrect!!)
+            listener!!.onClick(topic!!, questionIndex!!, numCorrect!!)
         }
         return view
     }
@@ -94,7 +98,7 @@ class AnswerFragment : Fragment() {
      * for more information.
      */
     interface OnNextAnswerListener {
-        fun onClick(questions: Array<String>, questionIndex: Int, numCorrect: Int)
+        fun onClick(topic: String, questionIndex: Int, numCorrect: Int)
     }
 
     companion object {
@@ -107,18 +111,18 @@ class AnswerFragment : Fragment() {
          * @return A new instance of fragment AnswerFragment.
          */
         @JvmStatic
-        fun newInstance(numCorrect: Int,
+        fun newInstance(topic: String,
+                        numCorrect: Int,
                         questionIndex: Int,
-                        questions: Array<String>,
                         userAnswer: String,
                         correctAnswer: String) =
             AnswerFragment().apply {
                 arguments = Bundle().apply {
                     putInt("NUM_CORRECT", numCorrect)
                     putInt("QUESTION_INDEX", questionIndex)
-                    putStringArray("QUESTIONS", questions)
                     putString("USER_ANSWER", userAnswer)
                     putString("CORRECT_ANSWER", correctAnswer)
+                    putString("TOPIC", topic)
                 }
             }
     }

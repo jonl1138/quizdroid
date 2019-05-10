@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+import kotlinx.android.synthetic.main.fragment_question.*
 
 
 /**
@@ -25,24 +26,25 @@ import android.widget.TextView
  */
 class QuestionFragment : Fragment() {
 
+    private var topic: String? = null
     private var questionIndex: Int? = null
     private var numCorrect: Int? = null
-    private var questions: Array<String>? = null
+    private var questions: Array<Question>? = null
     private var correctAnswer: String? = null
     private var listener: OnNextClickListener? = null
-    lateinit private var answers: Map<String, Array<String>>
+    private var currentQuestion: Question? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
+            topic = it.getString("TOPIC")
             questionIndex = it.getInt("QUESTION_NUMBER")
             numCorrect = it.getInt("NUM_CORRECT")
-            questions = it.getStringArray("QUESTIONS")
         }
 
         val quizApp = QuizApp.instance
         val dataManager = quizApp.dataManager
-        answers = dataManager.getAnswers()!!
+        questions = dataManager.getFullTopics()[topic]!!.questions
     }
 
     override fun onCreateView(
@@ -51,20 +53,19 @@ class QuestionFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_question, container, false)
-        questionIndex = arguments!!.getInt("QUESTION_NUMBER")
+        questionIndex = arguments!!.getInt("QUESTION_INDEX")
         numCorrect = arguments!!.getInt("NUM_CORRECT")
-        questions = arguments!!.getStringArray("QUESTIONS")
 
         // set submit button disabled by default
         val submitButton = view.findViewById<Button>(R.id.submit)
         submitButton.setEnabled(false)
 
         // setting correct answer
-        val currentQuestion = questions!![questionIndex!!]
-        correctAnswer = answers.get(currentQuestion)!![0]
+        currentQuestion = questions!![questionIndex!!]
+        correctAnswer = currentQuestion!!.answers[currentQuestion!!.correctAnswer]
 
         // generating question, answers, etc.
-        generateContent(questions!!, view)
+        generateContent(view)
 
 
         submitButton.setOnClickListener {
@@ -76,18 +77,19 @@ class QuestionFragment : Fragment() {
                 numCorrect = numCorrect!! + 1
             }
             questionIndex = questionIndex!! + 1
-            listener!!.onNextClick(numCorrect!!, questionIndex!!, questions!!, userAnswer, correctAnswer!!)
+            listener!!.onNextClick(topic!!, numCorrect!!, questionIndex!!, userAnswer, correctAnswer!!)
         }
         return view
     }
-    fun generateContent(questions: Array<String>, view: View) {
+
+    fun generateContent(view: View) {
         // generates buttons
-        val currentQuestion = questions[questionIndex!!]
-        val currentAnswers = answers.get(currentQuestion)
+        val currentQ = currentQuestion!!.question
+        val currentAnswers = currentQuestion!!.answers
 
         // generate question
         val currentTitle = view.findViewById<TextView>(R.id.question)
-        currentTitle.text = currentQuestion
+        currentTitle.text = currentQ
 
         var takenOptions: Set<Int> = setOf(5)
         // loop over answers to current question
@@ -133,26 +135,17 @@ class QuestionFragment : Fragment() {
      * for more information.
      */
     interface OnNextClickListener {
-        fun onNextClick(numCorrect: Int, questionIndex: Int, questions: Array<String>, userAnswer: String, correctAnswer: String)
+        fun onNextClick(topic: String, numCorrect: Int, questionIndex: Int, userAnswer: String, correctAnswer: String)
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment QuestionFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(questions: Array<String>, question_number: Int, num_correct:Int) =
+        fun newInstance(topic: String, question_number: Int, num_correct:Int) =
             QuestionFragment().apply {
                 arguments = Bundle().apply {
-                    putStringArray("QUESTIONS", questions)
-                    putInt("QUESTION_NUMBER", question_number)
+                    putInt("QUESTION_INDEX", question_number)
                     putInt("NUM_CORRECT", num_correct)
+                    putString("TOPIC", topic)
                 }
             }
     }

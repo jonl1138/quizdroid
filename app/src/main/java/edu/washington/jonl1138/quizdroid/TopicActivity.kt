@@ -12,10 +12,9 @@ import java.io.Serializable
 
 class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, QuestionFragment.OnNextClickListener, AnswerFragment.OnNextAnswerListener {
 
-    private var questionIndex = 0
-    private var currentTopic = ""
-    lateinit private var descriptions: Map<String, String>
-    lateinit private var questions: Map<String, Array<String>>
+    private var questionIndex: Int? = null
+    private var currentTopic: String? = null
+    private var questions: Array<Question>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,24 +27,24 @@ class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, Que
         // accesses DataManager to get stored descriptions/ questions lists
         val quizApp = QuizApp.instance
         val dataManager = quizApp.dataManager
-        descriptions = dataManager.getDescriptions()
-        questions = dataManager.getQuestions()
+        questions = dataManager.getFullTopics()[currentTopic!!]!!.questions
 
         // By default starts TopicFragment
-        val topicDescFragment = TopicFragment.newInstance(currentTopic, descriptions.get(currentTopic)!!, questions.get(currentTopic)!!.size)
+        val topicDescFragment = TopicFragment.newInstance(currentTopic!!)
         supportFragmentManager.beginTransaction().run {
             add(R.id.fragment_container, topicDescFragment, "TOPIC_FRAGMENT")
             commit()
         }
     }
 
-    override fun onClick(input_questions: Array<String>, questionIndex: Int, numCorrect: Int) {
-        if (questionIndex == input_questions.size) {
+    override fun onClick(topic: String, questionIndex: Int, numCorrect: Int) {
+        if (questionIndex == questions!!.size) {
             val intent: Intent = Intent(baseContext, MainActivity::class.java);
             startActivity(intent)
 
         } else {
-            val questionFragment = QuestionFragment.newInstance(questions[currentTopic]!!, questionIndex, numCorrect)
+            Log.d("debugging", questionIndex.toString())
+            val questionFragment = QuestionFragment.newInstance(currentTopic!!, questionIndex, numCorrect)
             supportFragmentManager.beginTransaction().run {
                 replace(R.id.fragment_container, questionFragment, "QUESTION_FRAGMENT")
                 commit()
@@ -54,13 +53,13 @@ class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, Que
     }
 
     override fun onNextClick(
+        topic: String,
         numCorrect: Int,
         questionIndex: Int,
-        questions: Array<String>,
         userAnswer: String,
         correctAnswer: String
     ) {
-        val answerFragment = AnswerFragment.newInstance(numCorrect, questionIndex, questions, userAnswer, correctAnswer)
+        val answerFragment = AnswerFragment.newInstance(currentTopic!!, numCorrect, questionIndex, userAnswer, correctAnswer)
         supportFragmentManager.beginTransaction().run {
             replace(R.id.fragment_container, answerFragment, "ANSWER_FRAGMENT")
             commit()
@@ -71,7 +70,7 @@ class TopicActivity : AppCompatActivity(), TopicFragment.BeginClickListener, Que
     override fun onBeginClick(question_number: Int, topic: String) {
         questionIndex = question_number
         currentTopic = topic
-        val questionFragment = QuestionFragment.newInstance(questions[currentTopic]!!, 0, 0)
+        val questionFragment = QuestionFragment.newInstance(currentTopic!!, 0, 0)
         supportFragmentManager.beginTransaction().run {
             replace(R.id.fragment_container, questionFragment, "QUESTION_FRAGMENT")
             commit()
