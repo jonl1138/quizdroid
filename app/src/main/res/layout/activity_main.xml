@@ -6,49 +6,59 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:stretchColumns="1"
-        tools:context=".MainActivity">
+        tools:context=".MainActivity" android:id="@+id/constraintLayout2">
+
+    <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    />
 
 
     <TableRow
             android:gravity="center_vertical"
             android:layout_width="match_parent" android:layout_height="wrap_content">
         <Button
-                android:text="Football"
+                android:text="Topic 1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/football"/>
+                android:layout_height="wrap_content" android:id="@+id/topic1"/>
         <TextView
                 android:text="TextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/football_desc"/>
+                android:layout_height="wrap_content" android:id="@+id/topic1_desc"/>
     </TableRow>
     <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
         <Button
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/math" android:text="Math"/>
+                android:layout_height="wrap_content" android:id="@+id/topic2" android:text="Topic 2"/>
         <TextView
                 android:text="TextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/math_desc"/>
+                android:layout_height="wrap_content" android:id="@+id/topic2_desc"/>
     </TableRow>
     <TableRow android:layout_width="match_parent" android:layout_height="wrap_content">
         <Button
-                android:text="Physics"
+                android:text="Topic 3"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/physics"/>
+                android:layout_height="wrap_content" android:id="@+id/topic3"/>
         <TextView
                 android:text="TextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/physics_desc"/>
+                android:layout_height="wrap_content" android:id="@+id/topic3_desc"/>
     </TableRow>
     <TableRow android:layout_width="match_parent" android:layout_height="wrap_content">
         <Button
-                android:text="Marvel Superheroes"
+                android:text="Topic 4"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/marvel_superheroes"/>
+                android:layout_height="wrap_content" android:id="@+id/topic4"/>
         <TextView
                 android:text="TextView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/marvel_superheroes_desc"/>
+                android:layout_height="wrap_content" android:id="@+id/topic4_desc"/>
     </TableRow>
 
 </TableLayout>

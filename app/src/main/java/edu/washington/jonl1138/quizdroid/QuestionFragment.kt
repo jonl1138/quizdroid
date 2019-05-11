@@ -1,10 +1,8 @@
 package edu.washington.jonl1138.quizdroid
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,21 +10,10 @@ import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
-import kotlinx.android.synthetic.main.fragment_question.*
 
-
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [QuestionFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [QuestionFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
+// Fragment representing "question" portion of QuizDroid
 class QuestionFragment : Fragment() {
-
-    private var topic: String? = null
+    private var topicIndex: Int? = null
     private var questionIndex: Int? = null
     private var numCorrect: Int? = null
     private var questions: Array<Question>? = null
@@ -37,24 +24,23 @@ class QuestionFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            topic = it.getString("TOPIC")
-            questionIndex = it.getInt("QUESTION_NUMBER")
+            topicIndex = it.getInt("TOPIC_INDEX")
+            questionIndex = it.getInt("QUESTION_INDEX")
             numCorrect = it.getInt("NUM_CORRECT")
         }
 
         val quizApp = QuizApp.instance
         val dataManager = quizApp.dataManager
-        questions = dataManager.getFullTopics()[topic]!!.questions
+        questions = dataManager.getFullTopics()[topicIndex!!].questions
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_question, container, false)
-        questionIndex = arguments!!.getInt("QUESTION_INDEX")
-        numCorrect = arguments!!.getInt("NUM_CORRECT")
 
         // set submit button disabled by default
         val submitButton = view.findViewById<Button>(R.id.submit)
@@ -62,12 +48,12 @@ class QuestionFragment : Fragment() {
 
         // setting correct answer
         currentQuestion = questions!![questionIndex!!]
-        correctAnswer = currentQuestion!!.answers[currentQuestion!!.correctAnswer]
+        correctAnswer = currentQuestion!!.answers[currentQuestion!!.correctAnswer - 1]
 
         // generating question, answers, etc.
         generateContent(view)
 
-
+        // sets the submit button to move to the Answer fragment
         submitButton.setOnClickListener {
             val buttonGroup = view.findViewById<RadioGroup>(R.id.answer_group)
             val radioID = buttonGroup.checkedRadioButtonId
@@ -77,12 +63,12 @@ class QuestionFragment : Fragment() {
                 numCorrect = numCorrect!! + 1
             }
             questionIndex = questionIndex!! + 1
-            listener!!.onNextClick(topic!!, numCorrect!!, questionIndex!!, userAnswer, correctAnswer!!)
+            listener!!.onNextClick(topicIndex!!, numCorrect!!, questionIndex!!, userAnswer, correctAnswer!!)
         }
         return view
     }
 
-    fun generateContent(view: View) {
+    private fun generateContent(view: View) {
         // generates buttons
         val currentQ = currentQuestion!!.question
         val currentAnswers = currentQuestion!!.answers
@@ -101,7 +87,8 @@ class QuestionFragment : Fragment() {
             takenOptions = takenOptions.plus(rndIndex)
             val targetID = resources.getIdentifier("answer" + rndIndex, "id", "edu.washington.jonl1138.quizdroid")
             val targetButton = view.findViewById<RadioButton>(targetID)
-            targetButton.text = currentAnswers!![i]
+            targetButton.text = currentAnswers[i]
+
             // activate submit button if any button is selected
             targetButton.setOnClickListener {
                 view.findViewById<Button>(R.id.submit).setEnabled(true)
@@ -120,7 +107,7 @@ class QuestionFragment : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
-        //listener = null
+        listener = null
     }
 
     /**
@@ -135,17 +122,17 @@ class QuestionFragment : Fragment() {
      * for more information.
      */
     interface OnNextClickListener {
-        fun onNextClick(topic: String, numCorrect: Int, questionIndex: Int, userAnswer: String, correctAnswer: String)
+        fun onNextClick(topicIndex: Int, numCorrect: Int, questionIndex: Int, userAnswer: String, correctAnswer: String)
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(topic: String, question_number: Int, num_correct:Int) =
+        fun newInstance(topicIndex: Int, questionNumber: Int, numCorrect:Int) =
             QuestionFragment().apply {
                 arguments = Bundle().apply {
-                    putInt("QUESTION_INDEX", question_number)
-                    putInt("NUM_CORRECT", num_correct)
-                    putString("TOPIC", topic)
+                    putInt("QUESTION_INDEX", questionNumber)
+                    putInt("NUM_CORRECT", numCorrect)
+                    putInt("TOPIC_INDEX", topicIndex)
                 }
             }
     }

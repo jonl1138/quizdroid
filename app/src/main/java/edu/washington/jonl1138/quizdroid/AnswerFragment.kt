@@ -1,8 +1,6 @@
 package edu.washington.jonl1138.quizdroid
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -11,22 +9,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 
-
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [AnswerFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [AnswerFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class AnswerFragment : Fragment() {
-    private var topic: String? = null
+    private var topicIndex: Int? = null
     private var numCorrect: Int? = null
     private var questionIndex: Int? = null
     private var questions: Array<Question>? = null
@@ -41,11 +25,11 @@ class AnswerFragment : Fragment() {
             questionIndex = it.getInt("QUESTION_INDEX")
             correctAnswer = it.getString("CORRECT_ANSWER")
             userAnswer = it.getString("USER_ANSWER")
-            topic = it.getString("TOPIC")
+            topicIndex = it.getInt("TOPIC_INDEX")
         }
         val quizApp = QuizApp.instance
         val dataManager = quizApp.dataManager
-        questions = dataManager.getFullTopics()[topic]!!.questions
+        questions = dataManager.getFullTopics()[topicIndex!!].questions
     }
 
     override fun onCreateView(
@@ -58,6 +42,7 @@ class AnswerFragment : Fragment() {
         view.findViewById<TextView>(R.id.userAnswer).text = "Your Answer:" + userAnswer
         view.findViewById<TextView>(R.id.correctAnswer).text = "Correct Answer:" + correctAnswer
 
+        // determine if button should display "Finish" or "Next Question"
         val continueButton = view.findViewById<Button>(R.id.next)
         if (questionIndex == questions!!.size) {
             continueButton.text = "Finish"
@@ -65,13 +50,13 @@ class AnswerFragment : Fragment() {
             continueButton.text = "Next Question"
         }
         continueButton.setOnClickListener {
-            listener!!.onClick(topic!!, questionIndex!!, numCorrect!!)
+            listener!!.onClick(topicIndex!!, questionIndex!!, numCorrect!!)
         }
         return view
     }
 
 
-
+    // as Fragment is attached, assign listener to TopicActivity's context
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is OnNextAnswerListener) {
@@ -98,20 +83,13 @@ class AnswerFragment : Fragment() {
      * for more information.
      */
     interface OnNextAnswerListener {
-        fun onClick(topic: String, questionIndex: Int, numCorrect: Int)
+        fun onClick(topicIndex: Int, questionIndex: Int, numCorrect: Int)
     }
 
+    // companion object that initializes an Answer Fragment
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AnswerFragment.
-         */
         @JvmStatic
-        fun newInstance(topic: String,
+        fun newInstance(topicIndex: Int,
                         numCorrect: Int,
                         questionIndex: Int,
                         userAnswer: String,
@@ -122,7 +100,7 @@ class AnswerFragment : Fragment() {
                     putInt("QUESTION_INDEX", questionIndex)
                     putString("USER_ANSWER", userAnswer)
                     putString("CORRECT_ANSWER", correctAnswer)
-                    putString("TOPIC", topic)
+                    putInt("TOPIC_INDEX", topicIndex)
                 }
             }
     }
