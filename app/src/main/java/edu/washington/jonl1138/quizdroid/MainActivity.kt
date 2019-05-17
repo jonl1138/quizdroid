@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             currentButton.setOnClickListener {
                 val buttonIntent = Intent(baseContext, TopicActivity::class.java)
                 buttonIntent.putExtra("TOPIC_INDEX", i - 1)
-                startActivity(intent)
+                startActivity(buttonIntent)
             }
         }
     }
